@@ -22,6 +22,8 @@ import requests
 import json
 from pathlib import Path
 
+from core.logging import LOGGER
+
 BASE_URL = "https://api.spacexdata.com/v4"
 ENDPOINTS = ["launches", "rockets", "launchpads", "payloads"]
 
@@ -49,9 +51,18 @@ def fetch_and_save(endpoint: str) -> None:
     resp = requests.get(url)
     resp.raise_for_status()
     data = resp.json()
-    with open(DATA_DIR / f"{endpoint}.json", "w") as f:
-        json.dump(data, f, indent=2)
-    print(f"✅ Saved {endpoint}.json ({len(data)} records)")
+    with open(DATA_DIR / f"{endpoint}.json", "w") as file:
+        json.dump(data, file, indent=2)
+
+    LOGGER.info(f"✅ Saved {endpoint}.json ({len(data)} records)")
+
+
+def fetch_all() -> None:
+    """
+    Fetches all SpaceX data endpoints and saves them as JSON files locally.
+    """
+    for endpoint in ENDPOINTS:
+        fetch_and_save(endpoint)
 
 
 if __name__ == "__main__":

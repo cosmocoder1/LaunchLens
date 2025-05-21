@@ -4,7 +4,7 @@ Each job wraps a standalone insight or visualization for clarity and modularity.
 """
 
 from pathlib import Path
-from service import MissionAnalyzer
+from analysis.service import MissionAnalyzer
 
 from core.logging import LOGGER
 

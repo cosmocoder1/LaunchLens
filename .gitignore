@@ -174,7 +174,7 @@ cython_debug/
 .pypirc
 
 # Ignore saved SpaceX JSON data
-data/*.json
+data/files/*
 
 # SQLite database
 data/spacex.sqlite

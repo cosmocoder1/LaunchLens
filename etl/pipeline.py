@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from core.logging import LOGGER
+from data.retrieval import fetch_all
 
 DB_PATH: Path = Path("data/spacex.sqlite")
 DATA_DIR: Path = Path("data/files")
@@ -168,10 +169,16 @@ class DataPipeline:
     def run(self) -> None:
         """
         Runs the full ETL pipeline:
+        - Retrieves fresh SpaceX data
         - Loads JSON records from disk
         - Inserts rockets, launchpads, payloads, and launches
         - Populates join table for launch-to-payload relationships
         """
+
+        LOGGER.info("🌐 Fetching fresh SpaceX data...")
+
+        fetch_all()
+
         LOGGER.info("🔄 Running ETL pipeline...")
 
         rockets = self.load_json(ROCKETS_PATH)
