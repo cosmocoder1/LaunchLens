@@ -15,6 +15,15 @@ def run_launch_trends() -> None:
     analyzer.launches_per_year()
 
 
+def run_rocket_success_rates() -> None:
+    """
+    Job: Show rocket success rates and highlight flawless performers.
+    """
+    analyzer = MissionAnalyzer(db_path=Path("data/spacex.sqlite"))
+    analyzer.rocket_success_rates()
+
+
 if __name__ == "__main__":
-    print("🛰️ Running SpaceX analysis jobs...\n")
+    print("Running SpaceX analysis jobs...\n")
     run_launch_trends()
+    run_rocket_success_rates()
