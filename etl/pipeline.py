@@ -58,6 +58,7 @@ def insert_rockets(connection: sqlite3.Connection, rockets: list[dict[str, Any]]
                     rocket.get("type")
                 )
             )
+
     print(f"Inserted {len(rockets)} rockets")
 
 
@@ -83,6 +84,7 @@ def insert_launchpads(connection: sqlite3.Connection, launchpads: list[dict[str,
                     pad.get("region")
                 )
             )
+
     print(f"Inserted {len(launchpads)} launchpads")
 
 
@@ -109,6 +111,7 @@ def insert_payloads(connection: sqlite3.Connection, payloads: list[dict[str, Any
                     payload.get("orbit")
                 )
             )
+
     print(f"Inserted {len(payloads)} payloads")
 
 
@@ -131,7 +134,37 @@ def insert_launch_payloads(connection: sqlite3.Connection, launches: list[dict[s
                     """,
                     (launch_id, payload_id)
                 )
+
     print(f"Mapped payloads for {len(launches)} launches")
+
+
+def insert_launches(connection: sqlite3.Connection, launches: list[dict[str, Any]]) -> None:
+    """
+    Inserts launch records into the database.
+
+    Args:
+        connection (sqlite3.Connection): SQLite DB connection.
+        launches (list[dict[str, Any]]): List of launch records.
+    """
+    with connection:
+        for launch in launches:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO launches (id, name, date_utc, success, rocket_id, launchpad_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    launch.get("id"),
+                    launch.get("name"),
+                    launch.get("date_utc"),
+                    launch.get("success"),
+                    launch.get("rocket"),
+                    launch.get("launchpad")
+                )
+            )
+
+    print(f"Inserted {len(launches)} launches")
+
 
 
 def run() -> None:
@@ -148,6 +181,8 @@ def run() -> None:
     insert_payloads(connection, payloads)
 
     launches = load_json(LAUNCHES_PATH)
+    # Insert launches before mapping payloads to preserve foreign key integrity
+    insert_launches(connection, launches)
     insert_launch_payloads(connection, launches)
 
 
