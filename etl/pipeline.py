@@ -20,6 +20,7 @@ DATA_DIR: Path = Path("data")
 ROCKETS_PATH: Path = DATA_DIR / "rockets.json"
 LAUNCHPADS_PATH: Path = DATA_DIR / "launchpads.json"
 PAYLOADS_PATH: Path = DATA_DIR / "payloads.json"
+LAUNCHES_PATH: Path = DATA_DIR / "launches.json"
 
 
 def load_json(path: Path) -> list[dict[str, Any]]:
@@ -84,6 +85,7 @@ def insert_launchpads(connection: sqlite3.Connection, launchpads: list[dict[str,
             )
     print(f"Inserted {len(launchpads)} launchpads")
 
+
 def insert_payloads(connection: sqlite3.Connection, payloads: list[dict[str, Any]]) -> None:
     """
     Inserts payload records into the SQLite database.
@@ -110,6 +112,28 @@ def insert_payloads(connection: sqlite3.Connection, payloads: list[dict[str, Any
     print(f"Inserted {len(payloads)} payloads")
 
 
+def insert_launch_payloads(connection: sqlite3.Connection, launches: list[dict[str, Any]]) -> None:
+    """
+    Inserts launch-to-payload mappings into the join table.
+
+    Args:
+        connection (sqlite3.Connection): SQLite DB connection.
+        launches (list[dict[str, Any]]): Launch records containing payload ID lists.
+    """
+    with connection:
+        for launch in launches:
+            launch_id = launch.get("id")
+            for payload_id in launch.get("payloads", []):
+                connection.execute(
+                    """
+                    INSERT OR IGNORE INTO launch_payload (launch_id, payload_id)
+                    VALUES (?, ?)
+                    """,
+                    (launch_id, payload_id)
+                )
+    print(f"Mapped payloads for {len(launches)} launches")
+
+
 def run() -> None:
     """Runs the ETL pipeline for rockets, launchpads, and payloads."""
     connection = sqlite3.connect(DB_PATH)
@@ -122,6 +146,9 @@ def run() -> None:
 
     payloads = load_json(PAYLOADS_PATH)
     insert_payloads(connection, payloads)
+
+    launches = load_json(LAUNCHES_PATH)
+    insert_launch_payloads(connection, launches)
 
 
 if __name__ == "__main__":
