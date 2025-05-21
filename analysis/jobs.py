@@ -31,9 +31,18 @@ def run_payload_mass_trend() -> None:
     analyzer.payload_mass_over_time()
 
 
+def run_launchpad_performance() -> None:
+    """
+    Job: Analyze launchpad usage and reliability.
+    """
+    analyzer = MissionAnalyzer(db_path=Path("data/spacex.sqlite"))
+    analyzer.launchpad_performance()
+
+
 if __name__ == "__main__":
     print("Running SpaceX analysis jobs...\n")
     run_launch_trends()
     run_rocket_success_rates()
     run_payload_mass_trend()
+    run_launchpad_performance()
 

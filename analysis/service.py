@@ -77,8 +77,11 @@ class MissionAnalyzer:
             plt.tight_layout()
             plt.savefig(plot_path)
             plt.close()
+
             LOGGER.info(f"✅ Saved launch trend chart to {plot_path}")
+
         except Exception as ex:
+
             LOGGER.error("Failed to render or save the plot.")
             LOGGER.exception(ex)
 
@@ -135,8 +138,11 @@ class MissionAnalyzer:
             plt.tight_layout()
             plt.savefig(plot_path)
             plt.close()
+
             LOGGER.info(f"✅ Saved rocket success rate chart to {plot_path}")
+
         except Exception as ex:
+
             LOGGER.error("Failed to render or save rocket success rate plot.")
             LOGGER.exception(ex)
 
@@ -185,8 +191,64 @@ class MissionAnalyzer:
             plt.tight_layout()
             plt.savefig(plot_path)
             plt.close()
+
             LOGGER.info(f"✅ Saved payload mass trend chart to {plot_path}")
+
         except Exception as ex:
+
             LOGGER.error("Failed to render or save payload mass plot.")
             LOGGER.exception(ex)
 
+    def launchpad_performance(self) -> None:
+        """
+        Analyzes launchpad usage and reliability.
+
+        Why it's useful:
+        - Reveals which launchpads are most trusted and used
+        - Highlights operational distribution and success rates
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        LOGGER.info("Analyzing launchpad performance...")
+
+        try:
+            dataframe = self.query("""
+                SELECT
+                    lp.name AS launchpad,
+                    COUNT(*) AS total_launches,
+                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
+                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                FROM launches l
+                JOIN launchpads lp ON l.launchpad_id = lp.id
+                GROUP BY lp.name
+                ORDER BY total_launches DESC;
+            """)
+        except Exception as ex:
+            LOGGER.error("Failed to query launchpad performance.")
+            LOGGER.exception(ex)
+            return
+
+        if dataframe.empty:
+            LOGGER.warning("No launchpad performance data found.")
+            return
+
+        plot_path = Path("analysis/plots/launchpad_performance.png")
+        try:
+            dataframe.plot.barh(x="launchpad", y="success_rate", legend=False, title="Launchpad Success Rates")
+            plt.xlabel("Success Rate (%)")
+            plt.xlim(0, 100)
+            plt.tight_layout()
+            plt.savefig(plot_path)
+            plt.close()
+
+            LOGGER.info(f"✅ Saved launchpad performance chart to {plot_path}")
+
+        except Exception as ex:
+
+            LOGGER.error("Failed to render or save launchpad performance plot.")
+            LOGGER.exception(ex)
