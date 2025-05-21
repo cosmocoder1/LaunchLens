@@ -19,6 +19,7 @@ DB_PATH: Path = Path("data/spacex.sqlite")
 DATA_DIR: Path = Path("data")
 ROCKETS_PATH: Path = DATA_DIR / "rockets.json"
 LAUNCHPADS_PATH: Path = DATA_DIR / "launchpads.json"
+PAYLOADS_PATH: Path = DATA_DIR / "payloads.json"
 
 
 def load_json(path: Path) -> list[dict[str, Any]]:
@@ -83,9 +84,34 @@ def insert_launchpads(connection: sqlite3.Connection, launchpads: list[dict[str,
             )
     print(f"Inserted {len(launchpads)} launchpads")
 
+def insert_payloads(connection: sqlite3.Connection, payloads: list[dict[str, Any]]) -> None:
+    """
+    Inserts payload records into the SQLite database.
+
+    Args:
+        connection (sqlite3.Connection): Active SQLite DB connection.
+        payloads (list[dict[str, Any]]): List of payload records to insert.
+    """
+    with connection:
+        for payload in payloads:
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO payloads (id, name, type, mass_kg, orbit)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    payload.get("id"),
+                    payload.get("name"),
+                    payload.get("type"),
+                    payload.get("mass_kg"),
+                    payload.get("orbit")
+                )
+            )
+    print(f"Inserted {len(payloads)} payloads")
+
 
 def run() -> None:
-    """Runs the ETL pipeline for rockets and launchpads."""
+    """Runs the ETL pipeline for rockets, launchpads, and payloads."""
     connection = sqlite3.connect(DB_PATH)
 
     rockets = load_json(ROCKETS_PATH)
@@ -93,6 +119,9 @@ def run() -> None:
 
     launchpads = load_json(LAUNCHPADS_PATH)
     insert_launchpads(connection, launchpads)
+
+    payloads = load_json(PAYLOADS_PATH)
+    insert_payloads(connection, payloads)
 
 
 if __name__ == "__main__":
