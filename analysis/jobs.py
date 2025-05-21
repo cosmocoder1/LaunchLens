@@ -6,6 +6,8 @@ Each job wraps a standalone insight or visualization for clarity and modularity.
 from pathlib import Path
 from service import MissionAnalyzer
 
+from core.logging import LOGGER
+
 
 def run_launch_trends() -> None:
     """
@@ -49,7 +51,9 @@ def run_plan_successful_launch() -> None:
 
 
 if __name__ == "__main__":
-    print("Running SpaceX analysis jobs...\n")
+
+    LOGGER.info("Running SpaceX analysis jobs...\n")
+
     run_launch_trends()
     run_rocket_success_rates()
     run_payload_mass_trend()

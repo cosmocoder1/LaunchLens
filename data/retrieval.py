@@ -25,12 +25,26 @@ from pathlib import Path
 BASE_URL = "https://api.spacexdata.com/v4"
 ENDPOINTS = ["launches", "rockets", "launchpads", "payloads"]
 
-DATA_DIR = Path("data")
+DATA_DIR = Path("data/files")
 DATA_DIR.mkdir(exist_ok=True)
 
 
 def fetch_and_save(endpoint: str) -> None:
-    """Fetches data from a SpaceX API endpoint and saves it as a local JSON file."""
+    """
+    Downloads data from the SpaceX public API and saves it as a formatted JSON file.
+
+    Args:
+        endpoint (str): The API endpoint to fetch (e.g., "launches", "rockets").
+
+    Behavior:
+        - Sends a GET request to BASE_URL/{endpoint}
+        - Raises an HTTPError if the request fails
+        - Writes the JSON response to data/files/{endpoint}.json
+        - Prints a success message with record count
+
+    Returns:
+        None
+    """
     url = f"{BASE_URL}/{endpoint}"
     resp = requests.get(url)
     resp.raise_for_status()
