@@ -39,10 +39,20 @@ def run_launchpad_performance() -> None:
     analyzer.launchpad_performance()
 
 
+def run_plan_successful_launch() -> None:
+    """
+    Job: Generate a statistically grounded mission plan based on past success data.
+    Outputs human-readable strategy to logs/plan_successful_launch.txt.
+    """
+    analyzer = MissionAnalyzer(db_path=Path("data/spacex.sqlite"))
+    analyzer.plan_successful_launch()
+
+
 if __name__ == "__main__":
     print("Running SpaceX analysis jobs...\n")
     run_launch_trends()
     run_rocket_success_rates()
     run_payload_mass_trend()
     run_launchpad_performance()
+    run_plan_successful_launch()
 

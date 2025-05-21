@@ -180,4 +180,4 @@ data/*.json
 data/spacex.sqlite
 
 # Visualizations
-analysis/plots/*.png
+analysis/plots/*

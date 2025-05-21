@@ -5,7 +5,9 @@ to offer insight into launches, rockets, payloads, and performance metrics.
 """
 
 import sqlite3
+from io import StringIO
 from pathlib import Path
+from tabulate import tabulate
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -252,3 +254,102 @@ class MissionAnalyzer:
 
             LOGGER.error("Failed to render or save launchpad performance plot.")
             LOGGER.exception(ex)
+
+    def plan_successful_launch(self) -> None:
+        """
+        Analyzes historical mission data to identify statistically reliable launch configurations.
+
+        Why it's useful:
+        - Guides strategic decisions for mission design
+        - Synthesizes multi-factor insights across rocket, launchpad, payload, and orbit
+
+        Returns:
+            None
+        """
+        LOGGER.info("Planning ideal mission configuration based on historical success rates...")
+
+        try:
+            report = StringIO()
+            report.write("🧠 SUCCESSFUL LAUNCH PLANNING\n" + "─" * 60 + "\n\n")
+
+            # 1. Rocket + Launchpad Pair Success
+            rocket_pad_df = self.query("""
+                SELECT
+                    r.name AS rocket,
+                    lp.name AS launchpad,
+                    COUNT(*) AS launches,
+                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
+                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                FROM launches l
+                JOIN rockets r ON l.rocket_id = r.id
+                JOIN launchpads lp ON l.launchpad_id = lp.id
+                GROUP BY r.name, lp.name
+                HAVING launches >= 3
+                ORDER BY success_rate DESC, launches DESC
+            """)
+            report.write("🚀 Top Rocket + Launchpad Configurations (min 3 launches):\n")
+            report.write(tabulate(rocket_pad_df.head(5), headers="keys", tablefmt="pretty") + "\n\n")
+
+            # 2. Orbit + Mass Bin Success
+            orbit_mass_df = self.query("""
+                SELECT
+                    p.orbit,
+                    CASE
+                        WHEN p.mass_kg < 500 THEN '0–500 kg'
+                        WHEN p.mass_kg < 2000 THEN '500–2000 kg'
+                        ELSE '2000+ kg'
+                    END AS mass_bin,
+                    COUNT(*) AS missions,
+                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
+                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                FROM payloads p
+                JOIN launch_payload lp ON p.id = lp.payload_id
+                JOIN launches l ON l.id = lp.launch_id
+                WHERE p.mass_kg IS NOT NULL AND p.orbit IS NOT NULL
+                GROUP BY orbit, mass_bin
+                HAVING missions >= 3
+                ORDER BY success_rate DESC, missions DESC
+            """)
+            report.write("📦 Best Orbit + Payload Mass Profiles:\n")
+            report.write(tabulate(orbit_mass_df.head(5), headers="keys", tablefmt="pretty") + "\n\n")
+
+            # 3. Success Rate by Year Range
+            year_df = self.query("""
+                SELECT
+                    strftime('%Y', date_utc) AS year,
+                    COUNT(*) AS launches,
+                    SUM(CASE WHEN success THEN 1 ELSE 0 END) AS successful,
+                    ROUND(100.0 * SUM(CASE WHEN success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                FROM launches
+                GROUP BY year
+                ORDER BY year ASC
+            """)
+            year_df["year"] = year_df["year"].astype(int)
+            recent_years = year_df[year_df["year"] >= 2018]
+            avg_recent = round(recent_years["success_rate"].mean(), 2)
+
+            report.write("📆 Success Rate by Year:\n")
+            report.write(tabulate(year_df.tail(5), headers="keys", tablefmt="pretty") + "\n")
+            report.write(f"\n🟢 Average success rate since 2018: {avg_recent}%\n\n")
+
+            # Final Recommendation
+            rec = rocket_pad_df.iloc[0]
+            orbit_rec = orbit_mass_df.iloc[0]
+            report.write("🧾 Recommended Launch Profile Based on Historical Data:\n")
+            report.write(f"- Rocket: {rec['rocket']}\n")
+            report.write(f"- Launchpad: {rec['launchpad']}\n")
+            report.write(f"- Orbit: {orbit_rec['orbit']}\n")
+            report.write(f"- Payload: {orbit_rec['mass_bin']}\n")
+            report.write(f"- Timeframe: 2018–2023\n")
+            report.write(f"  → Expected Success Rate: ~{avg_recent}%\n")
+
+            # Write to file
+            Path("analysis/plots").mkdir(parents=True, exist_ok=True)
+            Path("analysis/plots/successful_launch_planning.txt").write_text(report.getvalue())
+
+            LOGGER.info("✅ Launch plan summary written to analysis/plots/plan_successful_launch.txt")
+
+        except Exception as ex:
+            LOGGER.error("Failed to generate mission planning output.")
+            LOGGER.exception(ex)
+
