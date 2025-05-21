@@ -178,3 +178,6 @@ data/*.json
 
 # SQLite database
 data/spacex.sqlite
+
+# Visualizations
+analysis/plots/*.png

@@ -9,6 +9,8 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from core.logging import LOGGER
+
 
 class MissionAnalyzer:
     def __init__(self, db_path: Path) -> None:
@@ -49,17 +51,24 @@ class MissionAnalyzer:
         Returns:
             None
         """
-        print("\nLaunches per Year:")
+
+        LOGGER.info("Analyzing launches per year.")
+
         df = self.query("""
             SELECT strftime('%Y', date_utc) AS year, COUNT(*) AS launch_count
             FROM launches
             GROUP BY year
             ORDER BY year ASC;
         """)
-        print(df)
 
-        # Optional: bar plot
+        LOGGER.info("Launches per Year:")
+        LOGGER.info(df)
+
+        plot_path = Path("analysis/plots/launches_per_year.png")
         df.plot(x='year', y='launch_count', kind='bar', legend=False, title="Launches per Year")
         plt.ylabel("Number of Launches")
         plt.tight_layout()
-        plt.show()
+        plt.savefig(plot_path)
+        plt.close()
+
+        LOGGER.info(f"Saved launch trend chart to {plot_path}")
