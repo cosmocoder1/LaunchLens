@@ -51,24 +51,36 @@ class MissionAnalyzer:
         Returns:
             None
         """
-
         LOGGER.info("Analyzing launches per year.")
 
-        df = self.query("""
-            SELECT strftime('%Y', date_utc) AS year, COUNT(*) AS launch_count
-            FROM launches
-            GROUP BY year
-            ORDER BY year ASC;
-        """)
+        try:
+            df = self.query("""
+                SELECT strftime('%Y', date_utc) AS year, COUNT(*) AS launch_count
+                FROM launches
+                GROUP BY year
+                ORDER BY year ASC;
+            """)
+        except Exception as ex:
+            LOGGER.error("Failed to run SQL query for launches per year.")
+            LOGGER.exception(ex)
+            return
+
+        if df.empty:
+            LOGGER.warning("No data returned for launches per year.")
+            return
 
         LOGGER.info("Launches per Year:")
-        LOGGER.info(df)
+        LOGGER.info("\n" + df.to_string(index=False))
 
         plot_path = Path("analysis/plots/launches_per_year.png")
-        df.plot(x='year', y='launch_count', kind='bar', legend=False, title="Launches per Year")
-        plt.ylabel("Number of Launches")
-        plt.tight_layout()
-        plt.savefig(plot_path)
-        plt.close()
 
-        LOGGER.info(f"Saved launch trend chart to {plot_path}")
+        try:
+            df.plot(x='year', y='launch_count', kind='bar', legend=False, title="Launches per Year")
+            plt.ylabel("Number of Launches")
+            plt.tight_layout()
+            plt.savefig(plot_path)
+            plt.close()
+            LOGGER.info(f"Saved launch trend chart to {plot_path}")
+        except Exception as ex:
+            LOGGER.error("Failed to render or save the plot.")
+            LOGGER.exception(ex)
