@@ -139,3 +139,54 @@ class MissionAnalyzer:
         except Exception as ex:
             LOGGER.error("Failed to render or save rocket success rate plot.")
             LOGGER.exception(ex)
+
+    def payload_mass_over_time(self) -> None:
+        """
+        Visualizes payload mass over time to show mission scale and evolution.
+
+        Why it's useful:
+        - Highlights trends in mission heaviness
+        - Gives intuitive picture of capability growth over time
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        LOGGER.info("Analyzing payload mass over time...")
+
+        try:
+            dataframe = self.query("""
+                SELECT p.mass_kg, l.date_utc
+                FROM payloads p
+                JOIN launch_payload lp ON p.id = lp.payload_id
+                JOIN launches l ON l.id = lp.launch_id
+                WHERE p.mass_kg IS NOT NULL
+            """)
+        except Exception as ex:
+            LOGGER.error("Failed to retrieve payload mass data.")
+            LOGGER.exception(ex)
+            return
+
+        if dataframe.empty:
+            LOGGER.warning("No payload mass data available.")
+            return
+
+        dataframe["date"] = pd.to_datetime(dataframe["date_utc"])
+
+        plot_path = Path("analysis/plots/payload_mass_over_time.png")
+
+        try:
+            dataframe.plot.scatter(x="date", y="mass_kg", alpha=0.5, title="Payload Mass Over Time")
+            plt.ylabel("Mass (kg)")
+            plt.xlabel("Launch Date")
+            plt.tight_layout()
+            plt.savefig(plot_path)
+            plt.close()
+            LOGGER.info(f"✅ Saved payload mass trend chart to {plot_path}")
+        except Exception as ex:
+            LOGGER.error("Failed to render or save payload mass plot.")
+            LOGGER.exception(ex)
+
