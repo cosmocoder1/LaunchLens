@@ -74,9 +74,19 @@ class MainPipeline:
         Executes the entire pipeline from schema reset to analysis.
         """
         LOGGER.info("🚀 Starting MainPipeline...")
+
         self.reset_database()
         self.run_etl()
+
+        LOGGER.info("🧠 Starting analysis phase...")
+
         self.run_analysis()
+
+        # Import and run model training
+        from model.trainer import train_and_save_model
+        train_and_save_model(db_path=str(self.db_path))
+
+        LOGGER.info("🤖 ML model retrained and saved.")
         LOGGER.info("🏁 MainPipeline complete.")
 
 

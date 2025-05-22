@@ -54,14 +54,12 @@ def train_and_save_model(db_path: str = "data/spacex.sqlite", model_path: str = 
     y = df["success"]
 
     # Train XGBoost classifier
-    model = XGBClassifier(use_label_encoder=False, eval_metric="logloss")
+    model = XGBClassifier(eval_metric="logloss")
     model.fit(X, y)
 
     # Save model and column schema
     Path(model_path).parent.mkdir(parents=True, exist_ok=True)
     joblib.dump((model, X.columns.tolist()), model_path)
-
-    print(f"✅ Model trained and saved to {model_path}")
 
 
 if __name__ == "__main__":

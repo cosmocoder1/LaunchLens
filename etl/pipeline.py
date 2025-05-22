@@ -20,6 +20,7 @@ from typing import Any
 
 from core.logging import LOGGER
 from data.retrieval import fetch_all
+from model.trainer import train_and_save_model
 
 DB_PATH: Path = Path("data/spacex.sqlite")
 DATA_DIR: Path = Path("data/files")
