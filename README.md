@@ -88,10 +88,15 @@ This will:
 
 ## 📊 Example Insights
 
-- Launches per year and growth trends  
-- Rocket success rates by configuration  
-- Orbit + payload mass profile analysis  
-- 🧠 Strategic mission planner based on historical data  
+- Launch frequency trends and year-over-year growth  
+- Rocket success rates across configurations  
+- Payload mass distribution over time  
+- Launchpad performance and reliability metrics  
+- Strategic launch planner (rocket + pad + orbit + payload)  
+- Predicted success likelihood from custom mission inputs  
+- Rocket + launchpad configuration stability over time  
+- Sequential launch analysis to detect signs of rocket fatigue  
+- Natural language question answering over all insights (via RAG) 
 
 Charts and logs are written to `analysis/plots/`.
 
@@ -113,7 +118,6 @@ Charts and logs are written to `analysis/plots/`.
 
 ## 💪 Future Additions
 
-- 🔮 `predict_successful_launch()` – simulate success likelihood from hypothetical inputs  
 - ☁️ Cloud deployable / S3 integration
 - Unit tests & CI   
 - CLI argument support for partial runs (ETL-only, analysis-only)
