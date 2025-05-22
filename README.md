@@ -58,6 +58,7 @@ This project builds a complete data flow from raw SpaceX API ingestion to visual
 
 - Python 3.10+
 - [Pipenv](https://pipenv.pypa.io/en/latest/) installed (`pip install pipenv`)
+- `xgboost` installed locally (included in `Pipfile`, but must compile successfully)
 - OpenAI API key (optional, for RAG querying)
 
 ### 1. Clone and install
