@@ -17,6 +17,7 @@ from analysis.jobs import (
     run_plan_successful_launch
 )
 from core.logging import LOGGER
+from rag.indexer import build_vector_store
 
 DB_PATH = Path("data/spacex.sqlite")
 SCHEMA_PATH = Path("schema/schema.sql")
@@ -85,8 +86,13 @@ class MainPipeline:
         # Import and run model training
         from model.trainer import train_and_save_model
         train_and_save_model(db_path=str(self.db_path))
-
         LOGGER.info("🤖 ML model retrained and saved.")
+
+        # Build RAG index from analysis outputs
+        from rag.indexer import build_vector_store
+        build_vector_store()
+        LOGGER.info("🧠 RAG vector store built from analysis outputs.")
+
         LOGGER.info("🏁 MainPipeline complete.")
 
 

@@ -184,3 +184,6 @@ analysis/plots/*
 
 # ML models
 model/models/
+
+# Chroma Store
+chroma_store/
