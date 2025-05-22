@@ -102,9 +102,12 @@ Charts and logs are written to `analysis/plots/`.
 - Python 3.10+
 - SQLite3
 - Pandas + Matplotlib
-- Requests
-- Modular CLI structure
-- Clean logging
+- Scikit-learn + XGBoost (for predictive modeling)
+- Streamlit (interactive dashboard)
+- LangChain + ChromaDB + OpenAI (RAG-based question answering)
+- MkDocs + Material Theme (project documentation)
+- Modular CLI architecture
+- Clean structured logging (via custom LOGGER)
 
 ---
 
