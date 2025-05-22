@@ -269,9 +269,6 @@ class MissionAnalyzer:
         LOGGER.info("Planning ideal mission configuration based on historical success rates...")
 
         try:
-            report = StringIO()
-            report.write("🧠 SUCCESSFUL LAUNCH PLANNING\n" + "─" * 60 + "\n\n")
-
             # 1. Rocket + Launchpad Pair Success
             rocket_pad_df = self.query("""
                 SELECT
@@ -287,8 +284,7 @@ class MissionAnalyzer:
                 HAVING launches >= 3
                 ORDER BY success_rate DESC, launches DESC
             """)
-            report.write("🚀 Top Rocket + Launchpad Configurations (min 3 launches):\n")
-            report.write(tabulate(rocket_pad_df.head(5), headers="keys", tablefmt="pretty") + "\n\n")
+            rocket_pad_df.head(5).to_csv("analysis/plots/top_launchpad_configs.csv", index=False)
 
             # 2. Orbit + Mass Bin Success
             orbit_mass_df = self.query("""
@@ -310,10 +306,9 @@ class MissionAnalyzer:
                 HAVING missions >= 3
                 ORDER BY success_rate DESC, missions DESC
             """)
-            report.write("📦 Best Orbit + Payload Mass Profiles:\n")
-            report.write(tabulate(orbit_mass_df.head(5), headers="keys", tablefmt="pretty") + "\n\n")
+            orbit_mass_df.head(5).to_csv("analysis/plots/orbit_mass_profiles.csv", index=False)
 
-            # 3. Success Rate by Year Range
+            # 3. Success Rate by Year
             year_df = self.query("""
                 SELECT
                     strftime('%Y', date_utc) AS year,
@@ -327,29 +322,28 @@ class MissionAnalyzer:
             year_df["year"] = year_df["year"].astype(int)
             recent_years = year_df[year_df["year"] >= 2018]
             avg_recent = round(recent_years["success_rate"].mean(), 2)
+            year_df.tail(5).to_csv("analysis/plots/success_by_year.csv", index=False)
 
-            report.write("📆 Success Rate by Year:\n")
-            report.write(tabulate(year_df.tail(5), headers="keys", tablefmt="pretty") + "\n")
-            report.write(f"\n🟢 Average success rate since 2018: {avg_recent}%\n\n")
-
-            # Final Recommendation
+            # 4. Final Recommendation Markdown Summary
             rec = rocket_pad_df.iloc[0]
             orbit_rec = orbit_mass_df.iloc[0]
-            report.write("🧾 Recommended Launch Profile Based on Historical Data:\n")
-            report.write(f"- Rocket: {rec['rocket']}\n")
-            report.write(f"- Launchpad: {rec['launchpad']}\n")
-            report.write(f"- Orbit: {orbit_rec['orbit']}\n")
-            report.write(f"- Payload: {orbit_rec['mass_bin']}\n")
-            report.write(f"- Timeframe: 2018–2023\n")
-            report.write(f"  → Expected Success Rate: ~{avg_recent}%\n")
 
-            # Write to file
+            summary_md = f"""
+    🧾 **Recommended Launch Profile Based on Historical Data**
+
+    - **Rocket:** {rec['rocket']}
+    - **Launchpad:** {rec['launchpad']}
+    - **Orbit:** {orbit_rec['orbit']}
+    - **Payload:** {orbit_rec['mass_bin']}
+    - **Timeframe:** 2018–2023  
+    - **Expected Success Rate:** ~{avg_recent}%
+            """.strip()
+
             Path("analysis/plots").mkdir(parents=True, exist_ok=True)
-            Path("analysis/plots/successful_launch_planning.txt").write_text(report.getvalue())
+            Path("analysis/plots/launch_recommendation.md").write_text(summary_md)
 
-            LOGGER.info("✅ Launch plan summary written to analysis/plots/plan_successful_launch.txt")
+            LOGGER.info("✅ Launch plan summary and supporting CSVs written to analysis/plots/")
 
         except Exception as ex:
             LOGGER.error("Failed to generate mission planning output.")
             LOGGER.exception(ex)
-
