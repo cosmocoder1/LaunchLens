@@ -61,6 +61,10 @@ This project builds a complete data flow from raw SpaceX API ingestion to visual
 - `xgboost` installed locally (included in `Pipfile`, but must compile successfully)
 - OpenAI API key (optional, for RAG querying)
 
+If you're using M1/M2 Mac or encounter install issues, 
+- try:
+brew install libomp before installing xgboost
+
 ### 1. Clone and install
 
 ```bash
