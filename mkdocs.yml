@@ -1,0 +1,9 @@
+site_name: LaunchLens
+theme:
+  name: material
+
+nav:
+  - 🏠 Overview: index.md
+  - 🔄 ETL Pipeline: pipeline.md
+  - 🧠 Machine Learning: ml.md
+  - 💬 RAG Querying: rag.md
