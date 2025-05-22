@@ -45,6 +45,10 @@ def build_vector_store() -> None:
     Returns:
         None
     """
+    if not OPENAI_API_KEY:
+        LOGGER.warning("🔒 OpenAI API key not found — skipping vector store build.")
+        return
+
     LOGGER.info("Building vector store from analysis outputs...")
 
     loaders = [
