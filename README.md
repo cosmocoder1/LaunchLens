@@ -37,14 +37,16 @@ This project builds a complete data flow from raw SpaceX API ingestion to visual
 
 - `main.py` – Orchestrates the full pipeline
 - `data/retrieval.py` – Downloads raw JSON from the SpaceX API
-- `data/etl.py` – Loads data into SQLite (DataPipeline class)
-- `data/schema.sql` – SQL table definitions
+- `etl/pipeline.py` – Loads data into SQLite (DataPipeline class)
 - `data/files/` – Raw JSON storage (gitignored)
 - `data/spacex.sqlite` – Generated database
-- `service/service.py` – MissionAnalyzer (visual and tabular insights)
-- `service/jobs.py` – Executes individual analysis jobs
+- `analysis/service.py` – MissionAnalyzer (visual and tabular insights)
 - `analysis/plots/` – Output charts and summaries (gitignored)
 - `core/logging.py` – Shared logger utility
+- `model/models.py` – Trained classifier models
+- `model/predictor.py` – Applies trained models
+- `model/trainer.py` – Trains models
+- `scripts/build_db.py` – Runs database creation
 - `.gitignore`
 - `README.md`
 

@@ -15,7 +15,7 @@ from etl.pipeline import DataPipeline
 from rag.indexer import build_vector_store
 
 DB_PATH = Path("data/spacex.sqlite")
-SCHEMA_PATH = Path("schema/schema.sql")
+SCHEMA_PATH = Path("data/schema.sql")
 
 
 class MainPipeline:
