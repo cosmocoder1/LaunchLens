@@ -145,7 +145,6 @@ This project includes live documentation powered by [MkDocs](https://www.mkdocs.
 To run the docs locally:
 
 ```bash
-pipenv install mkdocs mkdocs-material
 pipenv run mkdocs serve
 ```
 
