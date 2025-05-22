@@ -88,7 +88,6 @@ class MainPipeline:
 
         # Build RAG index from analysis outputs
         build_vector_store()
-        LOGGER.info("RAG vector store built from analysis outputs.")
 
         LOGGER.info("🏁 MainPipeline complete.")
 

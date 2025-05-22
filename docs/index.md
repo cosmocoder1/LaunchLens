@@ -54,7 +54,7 @@ pipenv install
 echo "OPENAI_API_KEY=sk-..." > .env
 
 # Run the full pipeline (ETL + ML + RAG index)
-python main.py
+pipenv run python main.py
 
 # Launch the dashboard
 pipenv run streamlit run app.py

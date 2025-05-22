@@ -90,7 +90,7 @@ This will:
 
 ### 3. Launch the interactive dashboard
 
-    streamlit run app.py
+    pipenv run streamlit run app.py
 
 This will:
 
@@ -135,6 +135,23 @@ Charts and logs are written to `analysis/plots/`.
 - ☁️ Cloud deployable / S3 integration
 - Unit tests & CI   
 - CLI argument support for partial runs (ETL-only, analysis-only)
+
+---
+
+## 📘 Documentation
+
+This project includes live documentation powered by [MkDocs](https://www.mkdocs.org/) with the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme.
+
+To run the docs locally:
+
+```bash
+pipenv install mkdocs mkdocs-material
+pipenv run mkdocs serve
+```
+
+Then open your browser to: http://127.0.0.1:8000
+
+Documentation covers architecture, ETL flow, machine learning, and RAG integration. You can find all source files under the docs/ directory.
 
 ---
 
