@@ -54,18 +54,28 @@ This project builds a complete data flow from raw API ingestion to feature-rich 
 
     git clone https://github.com/your-username/spacex-data-pipeline.git
     cd spacex-data-pipeline
-    pipenv install  
+    pipenv install
 
-### 2. Run the full pipeline
+### 2. Run the full data pipeline
 
     python main.py
 
 This will:
 
 - Recreate the SQLite database  
-- Fetch fresh data from the SpaceX API  
-- Load data into normalized tables  
-- Generate visual insights in `analysis/plots/`
+- Fetch fresh SpaceX data from the public API  
+- Load and normalize data into structured tables  
+- Generate visual plots and CSV summaries in `analysis/plots/`
+
+### 3. Launch the interactive dashboard
+
+    streamlit run app.py
+
+This will:
+
+- Display all pre-generated plots and summaries  
+- Showcase strategic planning insights using interactive tables  
+- Provide a clean, modular UI for exploring launch patterns
 
 ---
 
