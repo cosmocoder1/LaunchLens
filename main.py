@@ -9,13 +9,7 @@ import sqlite3
 from pathlib import Path
 
 from etl.pipeline import DataPipeline
-from analysis.jobs import (
-    run_launch_trends,
-    run_rocket_success_rates,
-    run_payload_mass_trend,
-    run_launchpad_performance,
-    run_plan_successful_launch
-)
+from analysis.service import MissionAnalyzer
 from core.logging import LOGGER
 from rag.indexer import build_vector_store
 
@@ -62,13 +56,26 @@ class MainPipeline:
     @staticmethod
     def run_analysis() -> None:
         """
-        Runs all registered analytical jobs from the service layer.
+        Executes all analysis jobs using the MissionAnalyzer service.
+
+        This includes:
+        - Trend visualizations
+        - Launchpad and payload analytics
+        - Strategic mission planning
+        - Configuration stability
+        - Rocket fatigue trend detection
+
+        Outputs charts, CSVs, and summaries to the `analysis/plots/` directory.
         """
-        run_launch_trends()
-        run_rocket_success_rates()
-        run_payload_mass_trend()
-        run_launchpad_performance()
-        run_plan_successful_launch()
+        analyzer = MissionAnalyzer(db_path=Path("data/spacex.sqlite"))
+
+        analyzer.launches_per_year()
+        analyzer.rocket_success_rates()
+        analyzer.payload_mass_over_time()
+        analyzer.launchpad_performance()
+        analyzer.plan_successful_launch()
+        analyzer.analyze_config_stability()
+        analyzer.detect_rocket_fatigue()
 
     def run_all(self) -> None:
         """

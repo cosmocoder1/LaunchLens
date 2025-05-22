@@ -64,8 +64,11 @@ def build_vector_store():
     split_docs = splitter.split_documents(all_docs)
 
     embeddings = OpenAIEmbeddings()
-    vectorstore = Chroma.from_documents(split_docs, embeddings, persist_directory=str(CHROMA_DIR))
-    vectorstore.persist()
+    vectorstore = Chroma.from_documents(
+        split_docs,
+        embeddings,
+        persist_directory=str(CHROMA_DIR)
+    )
 
     LOGGER.info("✅ ChromaDB vector store built and saved to ./chroma_store")
 

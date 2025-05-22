@@ -347,3 +347,86 @@ class MissionAnalyzer:
         except Exception as ex:
             LOGGER.error("Failed to generate mission planning output.")
             LOGGER.exception(ex)
+
+    def analyze_config_stability(self) -> None:
+        """
+        Analyzes the stability of rocket + launchpad configurations over time.
+
+        This method calculates the year-by-year success rate for each configuration
+        and evaluates how consistent each one is by computing the standard deviation
+        and coefficient of variation (CV) of success rates across years.
+
+        Outputs:
+            - CSV: analysis/plots/config_stability.csv
+        """
+        LOGGER.info("📈 Analyzing configuration stability over time...")
+
+        try:
+            dataframe = self.query("""
+                SELECT
+                    r.name AS rocket,
+                    lp.name AS launchpad,
+                    strftime('%Y', l.date_utc) AS year,
+                    COUNT(*) AS launches,
+                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
+                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                FROM launches l
+                JOIN rockets r ON l.rocket_id = r.id
+                JOIN launchpads lp ON l.launchpad_id = lp.id
+                GROUP BY r.name, lp.name, year
+                HAVING launches >= 2
+            """)
+
+            grouped = dataframe.groupby(["rocket", "launchpad"])
+            stats = grouped["success_rate"].agg(["mean", "std"])
+            stats["cv"] = (stats["std"] / stats["mean"]).round(2)
+            stats = stats.reset_index().sort_values(by="cv")
+
+            stats.to_csv("analysis/plots/config_stability.csv", index=False)
+            LOGGER.info("✅ Saved configuration stability analysis to config_stability.csv")
+
+        except Exception as ex:
+            LOGGER.error("Failed to analyze configuration stability.")
+            LOGGER.exception(ex)
+
+    def detect_rocket_fatigue(self) -> None:
+        """
+        Detects performance drift across sequential launches for each rocket.
+
+        Assigns a launch number to each rocket over time and correlates launch number
+        with success rate to identify potential degradation or performance trends.
+
+        Outputs:
+            - CSV: analysis/plots/rocket_fatigue.csv
+        """
+        LOGGER.info("🔍 Detecting rocket fatigue and sequential performance trends...")
+
+        try:
+            dataframe = self.query("""
+                SELECT
+                    r.name AS rocket,
+                    l.date_utc,
+                    l.success
+                FROM launches l
+                JOIN rockets r ON l.rocket_id = r.id
+                WHERE l.success IS NOT NULL
+                ORDER BY r.name, l.date_utc
+            """)
+
+            dataframe["launch_number"] = dataframe.groupby("rocket")["date_utc"].rank(method="first").astype(int)
+            dataframe["success"] = dataframe["success"].astype(int)
+
+            grouped = dataframe.groupby(["rocket", "launch_number"]).agg(
+                launches=("success", "count"),
+                successful=("success", "sum")
+            ).reset_index()
+
+            grouped["success_rate"] = (100 * grouped["successful"] / grouped["launches"]).round(2)
+
+            grouped.to_csv("analysis/plots/rocket_fatigue.csv", index=False)
+            LOGGER.info("✅ Saved rocket fatigue trend data to rocket_fatigue.csv")
+
+        except Exception as ex:
+            LOGGER.error("Failed to analyze rocket fatigue.")
+            LOGGER.exception(ex)
+
