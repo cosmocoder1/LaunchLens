@@ -1,4 +1,4 @@
-"""RAG indexing pipeline for LaunchLens
+"""RAG indexing pipeline for LaunchLens.
 
 Embeds CSV summaries and markdown reports into a ChromaDB vector store
 to support natural language querying via LLMs.
@@ -8,10 +8,10 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain.document_loaders import TextLoader, CSVLoader
-from langchain_openai import OpenAIEmbeddings
+from langchain.document_loaders import CSVLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
 
 from core.logging import LOGGER
 
@@ -26,14 +26,11 @@ DATA_DIR = Path("analysis/plots")
 CHROMA_DIR = Path("chroma_store")
 
 
-def build_vector_store():
-    """
-    Loads analysis outputs (CSV and markdown files), converts them into
-    semantically meaningful document chunks, and embeds them into a
-    persistent ChromaDB vector store using OpenAI embeddings.
+def build_vector_store() -> None:
+    """Loads and indexes analysis outputs into a ChromaDB vector store.
 
-    The resulting store enables natural language querying of LaunchLens
-    analytics through a Retrieval-Augmented Generation (RAG) pipeline.
+    Converts CSV and markdown summaries into semantically meaningful chunks,
+    embeds them using OpenAI, and persists them for RAG querying.
 
     Files indexed:
         - launch_recommendation.md
@@ -47,7 +44,7 @@ def build_vector_store():
     Returns:
         None
     """
-    LOGGER.info("📦 Building vector store from analysis outputs...")
+    LOGGER.info("Building vector store from analysis outputs...")
 
     loaders = [
         TextLoader(str(DATA_DIR / "launch_recommendation.md")),
@@ -64,7 +61,7 @@ def build_vector_store():
     split_docs = splitter.split_documents(all_docs)
 
     embeddings = OpenAIEmbeddings()
-    vectorstore = Chroma.from_documents(
+    Chroma.from_documents(
         split_docs,
         embeddings,
         persist_directory=str(CHROMA_DIR)

@@ -1,7 +1,4 @@
-"""
-build_db.py
-
-Initializes the SQLite database by executing the schema defined in schema/schema.sql.
+"""Initializes the SQLite database by executing the schema defined in schema/schema.sql.
 
 Creates a new database file at data/spacex.sqlite if it doesn't exist.
 Intended to be run before any ETL scripts.
@@ -15,9 +12,7 @@ SCHEMA_PATH: Path = Path("schema/schema.sql")
 
 
 def build_database() -> None:
-    """
-    Creates the SQLite database and applies the schema.
-    """
+    """Creates the SQLite database and applies the schema."""
     if not SCHEMA_PATH.exists():
         raise FileNotFoundError(f"Schema file not found: {SCHEMA_PATH}")
 

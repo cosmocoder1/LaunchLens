@@ -1,4 +1,4 @@
-"""Launch Success Model Trainer
+"""Launch Success Model Trainer.
 
 This script extracts historical launch data from the SQLite database,
 performs feature engineering, and trains a classification model to
@@ -9,17 +9,19 @@ for use in downstream prediction utilities.
 
 """
 
-import joblib
 import sqlite3
 from pathlib import Path
 
+import joblib
 import pandas as pd
 from xgboost import XGBClassifier
 
 
-def train_and_save_model(db_path: str = "data/spacex.sqlite", model_path: str = "model/models/success_model.pkl") -> None:
-    """
-    Trains a launch success classifier using historical data and saves the model.
+def train_and_save_model(
+    db_path: str = "data/spacex.sqlite",
+    model_path: str = "model/models/success_model.pkl"
+) -> None:
+    """Trains a launch success classifier using historical data and saves the model.
 
     Args:
         db_path (str): Path to the SQLite database file.
@@ -46,7 +48,11 @@ def train_and_save_model(db_path: str = "data/spacex.sqlite", model_path: str = 
     conn.close()
 
     # Feature engineering
-    df["mass_bin"] = pd.cut(df["mass_kg"], bins=[0, 500, 2000, float("inf")], labels=["0–500", "500–2000", "2000+"])
+    df["mass_bin"] = pd.cut(
+        df["mass_kg"],
+        bins=[0, 500, 2000, float("inf")],
+        labels=["0–500", "500–2000", "2000+"]
+    )
     df["success"] = df["success"].astype(int)
 
     features = df[["rocket", "launchpad", "orbit", "mass_bin"]]

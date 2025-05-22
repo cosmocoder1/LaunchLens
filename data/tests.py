@@ -18,21 +18,33 @@ provides a lightweight overview before further processing.
 import json
 from pathlib import Path
 
+from core.logging import LOGGER
+
 DATA_DIR = Path("data")
 FILES = ["launches.json", "rockets.json", "launchpads.json", "payloads.json"]
 
 
-def load_json(name):
-    with open(DATA_DIR / name, "r") as f:
+def load_json(name: str) -> list[dict]:
+    """Loads a JSON file from the data directory.
+
+    Args:
+        name (str): Filename (e.g., "launches.json")
+
+    Returns:
+        list[dict]: Parsed JSON content as a list of records
+    """
+    with open(DATA_DIR / name) as f:
         return json.load(f)
 
 
 if __name__ == "__main__":
-    print("Data File Summary:\n")
+    LOGGER.info("Data File Summary:")
+
     for file in FILES:
         data = load_json(file)
-        print(f"{file:<20} → {len(data):>5} records")
+        LOGGER.info(f"{file:<20} → {len(data):>5} records")
 
-    print("\nSample launch:")
     launches = load_json("launches.json")
-    print(json.dumps(launches[0], indent=2)[:800] + "\n...")
+    LOGGER.info("Sample launch preview:")
+    LOGGER.info(json.dumps(launches[0], indent=2)[:800] + "\n...")
+

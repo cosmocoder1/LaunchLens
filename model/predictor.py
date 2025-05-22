@@ -1,4 +1,4 @@
-"""Launch Success Probability Inference
+"""Launch Success Probability Inference.
 
 This module provides a utility function for predicting the probability of a successful
 SpaceX launch given key mission parameters. It loads a pre-trained XGBoost model and
@@ -19,8 +19,7 @@ def predict_successful_launch(
     orbit: str,
     mass_bin: str
 ) -> float:
-    """
-    Predict the probability of a successful launch based on mission parameters.
+    """Predict the probability of a successful launch based on mission parameters.
 
     Args:
         rocket (str): Name of the rocket (e.g., "Falcon 9").

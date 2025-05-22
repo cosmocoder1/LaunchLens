@@ -1,4 +1,4 @@
-"""RAG query interface for LaunchLens
+"""RAG query interface for LaunchLens.
 
 Loads a persisted ChromaDB vector store and enables semantic querying
 of embedded analysis outputs using OpenAI's GPT-3.5/4.
@@ -6,7 +6,6 @@ of embedded analysis outputs using OpenAI's GPT-3.5/4.
 
 import os
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
@@ -20,9 +19,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 CHROMA_DIR = Path("chroma_store")
 
 
-def query_launchlens(question: str, model_name: str = "gpt-3.5-turbo") -> Optional[str]:
-    """
-    Answers a user question based on embedded LaunchLens content using a RAG pipeline.
+def query_launchlens(question: str, model_name: str = "gpt-3.5-turbo") -> str | None:
+    """Answers a user question based on embedded LaunchLens content using a RAG pipeline.
 
     Args:
         question (str): The user’s natural language query.

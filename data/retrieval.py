@@ -1,7 +1,4 @@
-"""
-retrieval.py
-
-Fetches raw SpaceX API data and stores it locally as JSON files.
+"""Fetches raw SpaceX API data and stores it locally as JSON files.
 
 This script downloads data from the public SpaceX REST API v4 for the following endpoints:
 - launches
@@ -18,9 +15,10 @@ Usage:
 This is intended as the first step in the ETL process for building a normalized SQLite database.
 """
 
-import requests
 import json
 from pathlib import Path
+
+import requests
 
 from core.logging import LOGGER
 
@@ -32,8 +30,7 @@ DATA_DIR.mkdir(exist_ok=True)
 
 
 def fetch_and_save(endpoint: str) -> None:
-    """
-    Downloads data from the SpaceX public API and saves it as a formatted JSON file.
+    """Downloads data from the SpaceX public API and saves it as a formatted JSON file.
 
     Args:
         endpoint (str): The API endpoint to fetch (e.g., "launches", "rockets").
@@ -58,9 +55,7 @@ def fetch_and_save(endpoint: str) -> None:
 
 
 def fetch_all() -> None:
-    """
-    Fetches all SpaceX data endpoints and saves them as JSON files locally.
-    """
+    """Fetches all SpaceX data endpoints and saves them as JSON files locally."""
     for endpoint in ENDPOINTS:
         fetch_and_save(endpoint)
 

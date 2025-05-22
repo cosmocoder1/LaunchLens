@@ -1,5 +1,4 @@
-"""
-ETL pipeline for populating the local SQLite database with structured SpaceX launch data.
+"""ETL pipeline for populating the local SQLite database with structured SpaceX launch data.
 
 This module defines the DataPipeline class, which loads raw JSON records from disk and
 inserts them into the appropriate tables:
@@ -20,7 +19,6 @@ from typing import Any
 
 from core.logging import LOGGER
 from data.retrieval import fetch_all
-from model.trainer import train_and_save_model
 
 DB_PATH: Path = Path("data/spacex.sqlite")
 DATA_DIR: Path = Path("data/files")
@@ -33,14 +31,13 @@ LAUNCHES_PATH: Path = DATA_DIR / "launches.json"
 
 
 class DataPipeline:
-    """
-    Loads and inserts structured SpaceX API data into a local SQLite database.
+    """Loads and inserts structured SpaceX API data into a local SQLite database.
+
     Supports rockets, launchpads, payloads, launches, and their relationships.
     """
 
     def __init__(self, db_path: Path = DB_PATH):
-        """
-        Initializes the pipeline with a database path and opens a SQLite connection.
+        """Initializes the pipeline with a database path and opens a SQLite connection.
 
         Args:
             db_path (Path): Path to the target SQLite database.
@@ -50,8 +47,7 @@ class DataPipeline:
 
     @staticmethod
     def load_json(path: Path) -> list[dict[str, Any]]:
-        """
-        Loads and parses a JSON file.
+        """Loads and parses a JSON file.
 
         Args:
             path (Path): Path to the JSON file.
@@ -59,12 +55,11 @@ class DataPipeline:
         Returns:
             list[dict[str, Any]]: Parsed list of records from the file.
         """
-        with open(path, "r") as f:
+        with open(path) as f:
             return json.load(f)
 
     def insert_rockets(self, rockets: list[dict[str, Any]]) -> None:
-        """
-        Inserts rocket records into the database.
+        """Inserts rocket records into the database.
 
         Args:
             rockets (list[dict[str, Any]]): List of rocket records.
@@ -78,11 +73,10 @@ class DataPipeline:
                     """,
                     (rocket.get("id"), rocket.get("name"), rocket.get("type"))
                 )
-        LOGGER.info(f"🛰️ Inserted {len(rockets)} rockets")
+        LOGGER.info(f"Inserted {len(rockets)} rockets")
 
     def insert_launchpads(self, launchpads: list[dict[str, Any]]) -> None:
-        """
-        Inserts launchpad records into the database.
+        """Inserts launchpad records into the database.
 
         Args:
             launchpads (list[dict[str, Any]]): List of launchpad records.
@@ -96,11 +90,10 @@ class DataPipeline:
                     """,
                     (pad.get("id"), pad.get("name"), pad.get("locality"), pad.get("region"))
                 )
-        LOGGER.info(f"🏗️ Inserted {len(launchpads)} launchpads")
+        LOGGER.info(f"Inserted {len(launchpads)} launchpads")
 
     def insert_payloads(self, payloads: list[dict[str, Any]]) -> None:
-        """
-        Inserts payload records into the database.
+        """Inserts payload records into the database.
 
         Args:
             payloads (list[dict[str, Any]]): List of payload records.
@@ -120,11 +113,10 @@ class DataPipeline:
                         payload.get("orbit")
                     )
                 )
-        LOGGER.info(f"📦 Inserted {len(payloads)} payloads")
+        LOGGER.info(f"Inserted {len(payloads)} payloads")
 
     def insert_launches(self, launches: list[dict[str, Any]]) -> None:
-        """
-        Inserts launch records into the database.
+        """Inserts launch records into the database.
 
         Args:
             launches (list[dict[str, Any]]): List of launch records.
@@ -133,7 +125,14 @@ class DataPipeline:
             for launch in launches:
                 self.connection.execute(
                     """
-                    INSERT OR IGNORE INTO launches (id, name, date_utc, success, rocket_id, launchpad_id)
+                    INSERT OR IGNORE INTO launches (
+                        id,
+                        name,
+                        date_utc,
+                        success,
+                        rocket_id,
+                        launchpad_id
+                    )
                     VALUES (?, ?, ?, ?, ?, ?)
                     """,
                     (
@@ -145,11 +144,10 @@ class DataPipeline:
                         launch.get("launchpad")
                     )
                 )
-        LOGGER.info(f"🚀 Inserted {len(launches)} launches")
+        LOGGER.info(f"Inserted {len(launches)} launches")
 
     def insert_launch_payloads(self, launches: list[dict[str, Any]]) -> None:
-        """
-        Inserts launch-to-payload mappings into the join table.
+        """Inserts launch-to-payload mappings into the join table.
 
         Args:
             launches (list[dict[str, Any]]): Launch records containing payload ID lists.
@@ -165,17 +163,17 @@ class DataPipeline:
                         """,
                         (launch_id, payload_id)
                     )
-        LOGGER.info(f"🔗 Mapped payloads for {len(launches)} launches")
+        LOGGER.info(f"Mapped payloads for {len(launches)} launches")
 
     def run(self) -> None:
-        """
-        Runs the full ETL pipeline:
-        - Retrieves fresh SpaceX data
-        - Loads JSON records from disk
-        - Inserts rockets, launchpads, payloads, and launches
-        - Populates join table for launch-to-payload relationships
-        """
+        """Runs the full ETL pipeline.
 
+        Tasks:
+            - Retrieves fresh SpaceX data
+            - Loads JSON records from disk
+            - Inserts rockets, launchpads, payloads, and launches
+            - Populates join table for launch-to-payload relationships
+        """
         LOGGER.info("🌐 Fetching fresh SpaceX data...")
 
         fetch_all()

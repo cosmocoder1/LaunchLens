@@ -1,5 +1,4 @@
-"""
-SpaceX Launch Insights Dashboard
+"""SpaceX LaunchLens Insights Dashboard.
 
 This Streamlit app provides an interactive interface for exploring visual and textual analytics
 derived from public SpaceX launch data. It loads pre-generated plots and summaries to help
@@ -10,18 +9,19 @@ Email: nathanalucy@gmail.com
 """
 
 import os
-from dotenv import load_dotenv
 from pathlib import Path
 
 import pandas as pd
-from PIL import Image
 import streamlit as st
-
+from dotenv import load_dotenv
+from PIL import Image
 
 st.set_page_config(page_title="LaunchLens", layout="wide")
 
 st.title("🚀 LaunchLens Dashboard")
-st.markdown("Analyze historical SpaceX launch data with visual insights and machine learning–powered predictions.")
+st.markdown("Analyze historical SpaceX launch data with visual insights and machine "
+            "learning–powered predictions."
+            )
 
 # Navigation options
 reports = {
@@ -176,7 +176,7 @@ else:
         st.image(image, caption=selection)
 
     if os.path.exists(text_path):
-        with open(text_path, "r") as f:
+        with open(text_path) as f:
             st.markdown(f"**Summary:**\n\n{f.read()}")
 
     if not os.path.exists(image_path) and not os.path.exists(text_path):

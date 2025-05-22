@@ -5,19 +5,23 @@ to offer insight into launches, rockets, payloads, and performance metrics.
 """
 
 import sqlite3
-from io import StringIO
 from pathlib import Path
-from tabulate import tabulate
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from core.logging import LOGGER
 
 
 class MissionAnalyzer:
+    """Provides data analysis and statistical insight generation for SpaceX launch data.
+
+    This service layer reads from the SQLite database and generates visualizations,
+    tabular summaries, and strategic outputs such as launch planning recommendations,
+    configuration stability metrics, and fatigue detection.
+    """
     def __init__(self, db_path: Path) -> None:
-        """
-        Initializes the analyzer with a connection to the SQLite database.
+        """Initializes the analyzer with a connection to the SQLite database.
 
         Args:
             db_path (Path): Path to the SQLite database file.
@@ -28,8 +32,7 @@ class MissionAnalyzer:
         self.db_path = db_path
 
     def query(self, sql: str) -> pd.DataFrame:
-        """
-        Executes a SQL query against the database and returns the result as a DataFrame.
+        """Executes a SQL query against the database and returns the result as a DataFrame.
 
         Args:
             sql (str): SQL query string.
@@ -41,8 +44,7 @@ class MissionAnalyzer:
             return pd.read_sql_query(sql, conn)
 
     def launches_per_year(self) -> None:
-        """
-        Displays a summary table and bar chart of the number of launches per year.
+        """Displays a summary table and bar chart of the number of launches per year.
 
         Why it's useful:
         - Shows operational growth and frequency trends over time
@@ -74,7 +76,13 @@ class MissionAnalyzer:
         plot_path = Path("analysis/plots/launches_per_year.png")
 
         try:
-            dataframe.plot(x="year", y="launch_count", kind="bar", legend=False, title="Launches per Year")
+            dataframe.plot(
+                x="year",
+                y="launch_count",
+                kind="bar",
+                legend=False,
+                title="Launches per Year"
+            )
             plt.ylabel("Number of Launches")
             plt.tight_layout()
             plt.savefig(plot_path)
@@ -88,8 +96,7 @@ class MissionAnalyzer:
             LOGGER.exception(ex)
 
     def rocket_success_rates(self) -> None:
-        """
-        Displays success rates for each rocket, highlighting reliability.
+        """Displays success rates for each rocket, highlighting reliability.
 
         Why it's useful:
         - Helps identify the most reliable vehicles in the fleet
@@ -101,7 +108,6 @@ class MissionAnalyzer:
         Returns:
             None
         """
-
         LOGGER.info("Analyzing rocket success rates...")
 
         try:
@@ -110,12 +116,16 @@ class MissionAnalyzer:
                     r.name AS rocket,
                     COUNT(*) AS total_launches,
                     SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                    ROUND(
+                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
+                        2
+                    ) AS success_rate
                 FROM launches l
                 JOIN rockets r ON l.rocket_id = r.id
                 GROUP BY r.name
                 ORDER BY success_rate DESC;
             """)
+
         except Exception as ex:
             LOGGER.error("Failed to compute rocket success rates.")
             LOGGER.exception(ex)
@@ -134,7 +144,13 @@ class MissionAnalyzer:
         # Plotting
         plot_path = Path("analysis/plots/rocket_success_rates.png")
         try:
-            dataframe.plot(x="rocket", y="success_rate", kind="bar", legend=False, title="Rocket Success Rates")
+            dataframe.plot(
+                x="rocket",
+                y="success_rate",
+                kind="bar",
+                legend=False,
+                title="Rocket Success Rates"
+            )
             plt.ylabel("Success Rate (%)")
             plt.xticks(rotation=45, ha="right")
             plt.tight_layout()
@@ -149,8 +165,7 @@ class MissionAnalyzer:
             LOGGER.exception(ex)
 
     def payload_mass_over_time(self) -> None:
-        """
-        Visualizes payload mass over time to show mission scale and evolution.
+        """Visualizes payload mass over time to show mission scale and evolution.
 
         Why it's useful:
         - Highlights trends in mission heaviness
@@ -162,7 +177,6 @@ class MissionAnalyzer:
         Returns:
             None
         """
-
         LOGGER.info("Analyzing payload mass over time...")
 
         try:
@@ -202,8 +216,7 @@ class MissionAnalyzer:
             LOGGER.exception(ex)
 
     def launchpad_performance(self) -> None:
-        """
-        Analyzes launchpad usage and reliability.
+        """Analyzes launchpad usage and reliability.
 
         Why it's useful:
         - Reveals which launchpads are most trusted and used
@@ -215,7 +228,6 @@ class MissionAnalyzer:
         Returns:
             None
         """
-
         LOGGER.info("Analyzing launchpad performance...")
 
         try:
@@ -224,12 +236,16 @@ class MissionAnalyzer:
                     lp.name AS launchpad,
                     COUNT(*) AS total_launches,
                     SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                    ROUND(
+                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
+                        2
+                    ) AS success_rate
                 FROM launches l
                 JOIN launchpads lp ON l.launchpad_id = lp.id
                 GROUP BY lp.name
                 ORDER BY total_launches DESC;
             """)
+
         except Exception as ex:
             LOGGER.error("Failed to query launchpad performance.")
             LOGGER.exception(ex)
@@ -241,7 +257,12 @@ class MissionAnalyzer:
 
         plot_path = Path("analysis/plots/launchpad_performance.png")
         try:
-            dataframe.plot.barh(x="launchpad", y="success_rate", legend=False, title="Launchpad Success Rates")
+            dataframe.plot.barh(
+                x="launchpad",
+                y="success_rate",
+                legend=False,
+                title="Launchpad Success Rates"
+            )
             plt.xlabel("Success Rate (%)")
             plt.xlim(0, 100)
             plt.tight_layout()
@@ -256,8 +277,7 @@ class MissionAnalyzer:
             LOGGER.exception(ex)
 
     def plan_successful_launch(self) -> None:
-        """
-        Analyzes historical mission data to identify statistically reliable launch configurations.
+        """Analyzes mission data to identify statistically reliable launch configurations.
 
         Why it's useful:
         - Guides strategic decisions for mission design
@@ -276,7 +296,10 @@ class MissionAnalyzer:
                     lp.name AS launchpad,
                     COUNT(*) AS launches,
                     SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                    ROUND(
+                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
+                        2
+                    ) AS success_rate
                 FROM launches l
                 JOIN rockets r ON l.rocket_id = r.id
                 JOIN launchpads lp ON l.launchpad_id = lp.id
@@ -284,6 +307,7 @@ class MissionAnalyzer:
                 HAVING launches >= 3
                 ORDER BY success_rate DESC, launches DESC
             """)
+
             rocket_pad_df.head(5).to_csv("analysis/plots/top_launchpad_configs.csv", index=False)
 
             # 2. Orbit + Mass Bin Success
@@ -297,7 +321,10 @@ class MissionAnalyzer:
                     END AS mass_bin,
                     COUNT(*) AS missions,
                     SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                    ROUND(
+                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
+                        2
+                    ) AS success_rate
                 FROM payloads p
                 JOIN launch_payload lp ON p.id = lp.payload_id
                 JOIN launches l ON l.id = lp.launch_id
@@ -314,11 +341,15 @@ class MissionAnalyzer:
                     strftime('%Y', date_utc) AS year,
                     COUNT(*) AS launches,
                     SUM(CASE WHEN success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(100.0 * SUM(CASE WHEN success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                    ROUND(
+                        100.0 * SUM(CASE WHEN success THEN 1 ELSE 0 END) / COUNT(*),
+                        2
+                    ) AS success_rate
                 FROM launches
                 GROUP BY year
                 ORDER BY year ASC
             """)
+
             year_df["year"] = year_df["year"].astype(int)
             recent_years = year_df[year_df["year"] >= 2018]
             avg_recent = round(recent_years["success_rate"].mean(), 2)
@@ -349,8 +380,7 @@ class MissionAnalyzer:
             LOGGER.exception(ex)
 
     def analyze_config_stability(self) -> None:
-        """
-        Analyzes the stability of rocket + launchpad configurations over time.
+        """Analyzes the stability of rocket + launchpad configurations over time.
 
         This method calculates the year-by-year success rate for each configuration
         and evaluates how consistent each one is by computing the standard deviation
@@ -369,7 +399,10 @@ class MissionAnalyzer:
                     strftime('%Y', l.date_utc) AS year,
                     COUNT(*) AS launches,
                     SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*), 2) AS success_rate
+                    ROUND(
+                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
+                        2
+                    ) AS success_rate
                 FROM launches l
                 JOIN rockets r ON l.rocket_id = r.id
                 JOIN launchpads lp ON l.launchpad_id = lp.id
@@ -390,8 +423,7 @@ class MissionAnalyzer:
             LOGGER.exception(ex)
 
     def detect_rocket_fatigue(self) -> None:
-        """
-        Detects performance drift across sequential launches for each rocket.
+        """Detects performance drift across sequential launches for each rocket.
 
         Assigns a launch number to each rocket over time and correlates launch number
         with success rate to identify potential degradation or performance trends.
@@ -413,7 +445,11 @@ class MissionAnalyzer:
                 ORDER BY r.name, l.date_utc
             """)
 
-            dataframe["launch_number"] = dataframe.groupby("rocket")["date_utc"].rank(method="first").astype(int)
+            dataframe["launch_number"] = (
+                dataframe.groupby("rocket")["date_utc"]
+                .rank(method="first")
+                .astype(int)
+            )
             dataframe["success"] = dataframe["success"].astype(int)
 
             grouped = dataframe.groupby(["rocket", "launch_number"]).agg(
