@@ -18,8 +18,9 @@ from core.logging import LOGGER
 # Load OpenAI key
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 if not OPENAI_API_KEY:
-    raise ValueError("OpenAI API key not found in .env")
+    LOGGER.info("🔒 OpenAI API key not found. RAG querying will be disabled.")
 
 # Paths
 DATA_DIR = Path("analysis/plots")
