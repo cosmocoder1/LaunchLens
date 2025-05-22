@@ -62,6 +62,22 @@ if key == "launch_planner":
     else:
         st.info("Recommendation summary not found.")
 
+    # 🎯 Predictive Model
+    st.subheader("🎯 Predict Mission Success")
+    rocket = st.selectbox("Rocket", ["Falcon 9", "Falcon Heavy"])
+    launchpad = st.selectbox("Launchpad", ["KSC LC 39A", "CCSFS SLC 40", "VAFB SLC 4E"])
+    orbit = st.selectbox("Orbit", ["LEO", "SSO", "PO", "GTO"])
+    mass_bin = st.selectbox("Payload Bin", ["0–500", "500–2000", "2000+"])
+
+    if st.button("Predict Success Rate"):
+        try:
+            from model.predictor import predict_successful_launch
+            score = predict_successful_launch(rocket, launchpad, orbit, mass_bin)
+            st.success(f"Estimated Success Probability: **{score}%**")
+        except Exception as e:
+            st.error("Model not found or failed to predict.")
+            st.exception(e)
+
 # --- Standard case: Plot + optional summary ---
 else:
     image_path = os.path.join("analysis", "plots", f"{key}.png")

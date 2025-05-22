@@ -181,3 +181,7 @@ data/spacex.sqlite
 
 # Visualizations
 analysis/plots/*
+
+# ML models
+model/models/
+
