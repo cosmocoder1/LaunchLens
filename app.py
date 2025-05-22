@@ -10,6 +10,7 @@ Email: nathanalucy@gmail.com
 """
 
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 import pandas as pd
@@ -28,7 +29,8 @@ reports = {
     "Launchpad Performance": "launchpad_performance",
     "Payload Mass Over Time": "payload_mass_over_time",
     "Rocket Success Rates": "rocket_success_rates",
-    "🧠 Strategic Launch Planner (Data-driven)": "launch_planner"
+    "🧠 Strategic Launch Planner (Data-driven)": "launch_planner",
+    "🧪 Advanced Insights": "advanced_insights"
 }
 
 selection = st.selectbox("Choose a report:", list(reports.keys()))
@@ -83,7 +85,6 @@ if key == "launch_planner":
     # 💬 Natural Language Query (RAG)
     st.subheader("💬 Ask a Question About the Launch Data")
 
-    from dotenv import load_dotenv
     load_dotenv()
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -111,6 +112,55 @@ if key == "launch_planner":
         st.markdown("- What is the most successful orbit and payload combination?")
         st.markdown("- How has the launch success rate changed since 2018?")
         st.markdown("- Which launchpad has the highest volume?")
+    else:
+        st.info("To enable natural language queries, add your OpenAI API key to a `.env` file.")
+
+elif key == "advanced_insights":
+    st.subheader("📊 Configuration Stability by Rocket + Launchpad")
+    stability_path = Path("analysis/plots/config_stability.csv")
+    if stability_path.exists():
+        df = pd.read_csv(stability_path)
+        st.dataframe(df)
+    else:
+        st.info("Stability data not available.")
+
+    st.subheader("📉 Rocket Fatigue Over Sequential Launches")
+    fatigue_path = Path("analysis/plots/rocket_fatigue.csv")
+    if fatigue_path.exists():
+        df = pd.read_csv(fatigue_path)
+        st.dataframe(df)
+    else:
+        st.info("Fatigue analysis not available.")
+
+    st.subheader("💬 Ask a Question About These Insights")
+
+    load_dotenv()
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    if OPENAI_API_KEY:
+        user_question = st.text_area(
+            "Enter your question:",
+            placeholder="e.g. Which rocket shows the most stable launch performance over time?",
+            height=100
+        )
+
+        if st.button("Ask (Advanced)") and user_question.strip():
+            with st.spinner("Thinking..."):
+                try:
+                    from rag.query_engine import query_launchlens
+                    response = query_launchlens(user_question)
+                    if response:
+                        st.success(response)
+                    else:
+                        st.warning("No answer was returned.")
+                except Exception as e:
+                    st.error("Query failed.")
+                    st.exception(e)
+
+        st.markdown("**Example questions:**")
+        st.markdown("- Which configuration is most stable?")
+        st.markdown("- Are there signs of rocket fatigue over time?")
+        st.markdown("- How does Falcon 9 performance vary year to year?")
     else:
         st.info("To enable natural language queries, add your OpenAI API key to a `.env` file.")
 
