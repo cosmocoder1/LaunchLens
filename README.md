@@ -1,8 +1,8 @@
-# 🚀 spacex-data-pipeline
+# 🚀 LaunchLens
 
 **ETL pipeline and analysis for public SpaceX launch data using Python + SQLite.**
 
-This project builds a complete data flow from raw API ingestion to feature-rich visual analysis, producing insights into mission trends, rocket performance, and strategic planning.
+This project builds a complete data flow from raw SpaceX API ingestion to visual and ML-powered analysis, delivering insights into mission trends, rocket performance, strategic planning, and launch success prediction.
 
 ---
 
@@ -25,6 +25,8 @@ This project builds a complete data flow from raw API ingestion to feature-rich 
 
 - 🧰 **Modular Codebase**  
   Clean separation of concerns via orchestrator, service classes, and jobs.
+
+- 🤖 ML-Powered Insight: Predicts launch success probability using an XGBoost model trained on historical data
 
 - **Plug-and-play Runner**  
   One command to run the full system from scratch.

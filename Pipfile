@@ -8,10 +8,10 @@ joblib = "*"
 matplotlib = "*"
 pandas = "*"
 requests = "*"
+scikit-learn = "*"
 streamlit = "*"
 tabulate = "*"
 xgboost = "*"
-scikit-learn = "*"
 
 [dev-packages]
 
