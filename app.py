@@ -9,11 +9,13 @@ Author: Nathan A. Lucy
 Email: nathanalucy@gmail.com
 """
 
-import streamlit as st
-import pandas as pd
-from pathlib import Path
-from PIL import Image
 import os
+from pathlib import Path
+
+import pandas as pd
+from PIL import Image
+import streamlit as st
+
 
 st.set_page_config(page_title="LaunchLens", layout="wide")
 
