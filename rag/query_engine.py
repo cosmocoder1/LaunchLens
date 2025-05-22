@@ -11,12 +11,15 @@ from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from core.logging import LOGGER
 
 # Load environment variables
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 CHROMA_DIR = Path("chroma_store")
+
+if not OPENAI_API_KEY:
+    LOGGER("🔒 OpenAI API key not found. Query functionality will be disabled.")
 
 
 def query_launchlens(question: str, model_name: str = "gpt-3.5-turbo") -> str | None:
