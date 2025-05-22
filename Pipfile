@@ -4,9 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+chromadb = "*"
 joblib = "*"
+langchain = "*"
 matplotlib = "*"
+openai = "*"
 pandas = "*"
+python-dotenv = "*"
 requests = "*"
 scikit-learn = "*"
 streamlit = "*"
