@@ -25,13 +25,14 @@ st.markdown("Analyze historical SpaceX launch data with visual insights and mach
 
 # Navigation options
 reports = {
+    "🎯 Predict Mission Success": "launch_planner",
+    "🧪 Advanced Insights": "advanced_insights",
     "Launches per Year": "launches_per_year",
     "Launchpad Performance": "launchpad_performance",
     "Payload Mass Over Time": "payload_mass_over_time",
-    "Rocket Success Rates": "rocket_success_rates",
-    "🧠 Strategic Launch Planner (Data-driven)": "launch_planner",
-    "🧪 Advanced Insights": "advanced_insights"
+    "Rocket Success Rates": "rocket_success_rates"
 }
+
 
 selection = st.selectbox("Choose a report:", list(reports.keys()))
 key = reports[selection]

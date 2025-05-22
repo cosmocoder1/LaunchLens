@@ -359,7 +359,7 @@ class MissionAnalyzer:
         Outputs:
             - CSV: analysis/plots/config_stability.csv
         """
-        LOGGER.info("📈 Analyzing configuration stability over time...")
+        LOGGER.info("Analyzing configuration stability over time...")
 
         try:
             dataframe = self.query("""
@@ -399,7 +399,7 @@ class MissionAnalyzer:
         Outputs:
             - CSV: analysis/plots/rocket_fatigue.csv
         """
-        LOGGER.info("🔍 Detecting rocket fatigue and sequential performance trends...")
+        LOGGER.info("Detecting rocket fatigue and sequential performance trends...")
 
         try:
             dataframe = self.query("""
