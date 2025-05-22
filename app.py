@@ -15,10 +15,10 @@ from pathlib import Path
 from PIL import Image
 import os
 
-st.set_page_config(page_title="SpaceX Launch Insights", layout="wide")
+st.set_page_config(page_title="LaunchLens", layout="wide")
 
-st.title("🚀 SpaceX Launch Insights Dashboard")
-st.markdown("Explore visual analytics and strategic summaries derived from the public SpaceX launch dataset.")
+st.title("🚀 LaunchLens Dashboard")
+st.markdown("Analyze historical SpaceX launch data with visual insights and machine learning–powered predictions.")
 
 # Navigation options
 reports = {
