@@ -54,15 +54,24 @@ This project builds a complete data flow from raw SpaceX API ingestion to visual
 
 ## ⚡ Quickstart
 
+### Prerequisites
+
+- Python 3.10+
+- [Pipenv](https://pipenv.pypa.io/en/latest/) installed (`pip install pipenv`)
+- OpenAI API key (optional, for RAG querying)
+
 ### 1. Clone and install
 
-    git clone https://github.com/cosmocoder1/LaunchLens.git
-    cd LaunchLens
-    pipenv install
+```bash
+git clone https://github.com/cosmocoder1/LaunchLens.git
+cd LaunchLens
+pipenv install
+```
 
 ### 2. Run the full data pipeline
-
-    python main.py
+```
+pipenv run python main.py
+```
 
 This will:
 
