@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from langchain.document_loaders import TextLoader, CSVLoader
 from langchain_openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
 
 from core.logging import LOGGER
 

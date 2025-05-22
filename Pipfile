@@ -7,6 +7,7 @@ name = "pypi"
 chromadb = "*"
 joblib = "*"
 langchain = "*"
+langchain-chroma = "*"
 langchain-community = "*"
 langchain-openai = "*"
 matplotlib = "*"
@@ -18,7 +19,6 @@ scikit-learn = "*"
 streamlit = "*"
 tabulate = "*"
 xgboost = "*"
-langchain-community = "*"
 
 [dev-packages]
 

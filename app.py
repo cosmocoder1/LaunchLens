@@ -76,9 +76,44 @@ if key == "launch_planner":
             from model.predictor import predict_successful_launch
             score = predict_successful_launch(rocket, launchpad, orbit, mass_bin)
             st.success(f"Estimated Success Probability: **{score}%**")
-        except Exception as e:
+        except Exception as ex:
             st.error("Model not found or failed to predict.")
-            st.exception(e)
+            st.exception(ex)
+
+    # 💬 Natural Language Query (RAG)
+    st.subheader("💬 Ask a Question About the Launch Data")
+
+    from dotenv import load_dotenv
+    load_dotenv()
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    if OPENAI_API_KEY:
+        user_question = st.text_area(
+            "Enter your question:",
+            placeholder="e.g. What rocket and launchpad combination has the highest success rate?",
+            height=100
+        )
+
+        if st.button("Ask LaunchLens") and user_question.strip():
+            with st.spinner("Thinking..."):
+                try:
+                    from rag.query_engine import query_launchlens
+                    response = query_launchlens(user_question)
+                    if response:
+                        st.success(response)
+                    else:
+                        st.warning("No answer was returned.")
+                except Exception as ex:
+                    st.error("Query failed.")
+                    st.exception(ex)
+
+        st.markdown("**Example questions:**")
+        st.markdown("- What is the most successful orbit and payload combination?")
+        st.markdown("- How has the launch success rate changed since 2018?")
+        st.markdown("- Which launchpad has the highest volume?")
+    else:
+        st.info("To enable natural language queries, add your OpenAI API key to a `.env` file.")
+
 
 # --- Standard case: Plot + optional summary ---
 else:

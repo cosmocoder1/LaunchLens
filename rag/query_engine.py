@@ -10,7 +10,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
-from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 # Load environment variables
@@ -46,4 +46,6 @@ def query_launchlens(question: str, model_name: str = "gpt-3.5-turbo") -> Option
         return_source_documents=False
     )
 
-    return qa_chain.run(question)
+    response = qa_chain.invoke({"query": question})
+
+    return response["result"]
