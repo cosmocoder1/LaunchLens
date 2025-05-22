@@ -1,28 +1,20 @@
-"""
-sqlite_database.py
+"""Provides a centralized interface for querying structured SpaceX launch data.
 
-Provides a centralized interface for querying structured SpaceX launch data
-from the SQLite database. All query methods return pandas DataFrames
-and encapsulate reusable SQL used across the analysis layer.
-
-Author: Nathan A. Lucy
+All query methods return pandas DataFrames and encapsulate reusable SQL used across
+the analysis layer.
 """
 
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 import pandas as pd
 
 
 class SQLiteDatabase:
-    """
-    Encapsulates reusable SQL queries for accessing SpaceX launch data
-    from the local SQLite database.
-    """
+    """Encapsulates reusable SQL queries for accessing SpaceX launch data from SQLite."""
 
     def __init__(self, db_path: Path) -> None:
-        """
-        Initializes the database connection.
+        """Initializes the database connection.
 
         Args:
             db_path (Path): Path to the SQLite database file.

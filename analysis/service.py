@@ -4,13 +4,13 @@ This class wraps analytical SQL queries and Python-based visualizations
 to offer insight into launches, rockets, payloads, and performance metrics.
 """
 
-import sqlite3
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from core.logging import LOGGER
+from data.sqlite_database import SQLiteDatabase
 
 
 class MissionAnalyzer:
@@ -29,19 +29,7 @@ class MissionAnalyzer:
         Returns:
             None
         """
-        self.db_path = db_path
-
-    def query(self, sql: str) -> pd.DataFrame:
-        """Executes a SQL query against the database and returns the result as a DataFrame.
-
-        Args:
-            sql (str): SQL query string.
-
-        Returns:
-            pd.DataFrame: Query results as a pandas DataFrame.
-        """
-        with sqlite3.connect(self.db_path) as conn:
-            return pd.read_sql_query(sql, conn)
+        self.db = SQLiteDatabase(db_path)
 
     def launches_per_year(self) -> None:
         """Displays a summary table and bar chart of the number of launches per year.
@@ -58,12 +46,7 @@ class MissionAnalyzer:
         LOGGER.info("Analyzing launches per year.")
 
         try:
-            dataframe = self.query("""
-                SELECT strftime('%Y', date_utc) AS year, COUNT(*) AS launch_count
-                FROM launches
-                GROUP BY year
-                ORDER BY year ASC;
-            """)
+            dataframe = self.db.get_launches_per_year()
         except Exception as ex:
             LOGGER.error("Failed to run SQL query for launches per year.")
             LOGGER.exception(ex)
@@ -111,20 +94,7 @@ class MissionAnalyzer:
         LOGGER.info("Analyzing rocket success rates...")
 
         try:
-            dataframe = self.query("""
-                SELECT
-                    r.name AS rocket,
-                    COUNT(*) AS total_launches,
-                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(
-                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
-                        2
-                    ) AS success_rate
-                FROM launches l
-                JOIN rockets r ON l.rocket_id = r.id
-                GROUP BY r.name
-                ORDER BY success_rate DESC;
-            """)
+            dataframe = self.db.get_rocket_success_rates()
 
         except Exception as ex:
             LOGGER.error("Failed to compute rocket success rates.")
@@ -180,13 +150,7 @@ class MissionAnalyzer:
         LOGGER.info("Analyzing payload mass over time...")
 
         try:
-            dataframe = self.query("""
-                SELECT p.mass_kg, l.date_utc
-                FROM payloads p
-                JOIN launch_payload lp ON p.id = lp.payload_id
-                JOIN launches l ON l.id = lp.launch_id
-                WHERE p.mass_kg IS NOT NULL
-            """)
+            dataframe = self.db.get_payload_mass_over_time()
         except Exception as ex:
             LOGGER.error("Failed to retrieve payload mass data.")
             LOGGER.exception(ex)
@@ -231,20 +195,7 @@ class MissionAnalyzer:
         LOGGER.info("Analyzing launchpad performance...")
 
         try:
-            dataframe = self.query("""
-                SELECT
-                    lp.name AS launchpad,
-                    COUNT(*) AS total_launches,
-                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(
-                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
-                        2
-                    ) AS success_rate
-                FROM launches l
-                JOIN launchpads lp ON l.launchpad_id = lp.id
-                GROUP BY lp.name
-                ORDER BY total_launches DESC;
-            """)
+            dataframe = self.db.get_launchpad_performance()
 
         except Exception as ex:
             LOGGER.error("Failed to query launchpad performance.")
@@ -290,65 +241,16 @@ class MissionAnalyzer:
 
         try:
             # 1. Rocket + Launchpad Pair Success
-            rocket_pad_df = self.query("""
-                SELECT
-                    r.name AS rocket,
-                    lp.name AS launchpad,
-                    COUNT(*) AS launches,
-                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(
-                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
-                        2
-                    ) AS success_rate
-                FROM launches l
-                JOIN rockets r ON l.rocket_id = r.id
-                JOIN launchpads lp ON l.launchpad_id = lp.id
-                GROUP BY r.name, lp.name
-                HAVING launches >= 3
-                ORDER BY success_rate DESC, launches DESC
-            """)
+            rocket_pad_df = self.db.get_rocket_launchpad_combinations()
 
             rocket_pad_df.head(5).to_csv("analysis/plots/top_launchpad_configs.csv", index=False)
 
             # 2. Orbit + Mass Bin Success
-            orbit_mass_df = self.query("""
-                SELECT
-                    p.orbit,
-                    CASE
-                        WHEN p.mass_kg < 500 THEN '0–500 kg'
-                        WHEN p.mass_kg < 2000 THEN '500–2000 kg'
-                        ELSE '2000+ kg'
-                    END AS mass_bin,
-                    COUNT(*) AS missions,
-                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(
-                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
-                        2
-                    ) AS success_rate
-                FROM payloads p
-                JOIN launch_payload lp ON p.id = lp.payload_id
-                JOIN launches l ON l.id = lp.launch_id
-                WHERE p.mass_kg IS NOT NULL AND p.orbit IS NOT NULL
-                GROUP BY orbit, mass_bin
-                HAVING missions >= 3
-                ORDER BY success_rate DESC, missions DESC
-            """)
+            orbit_mass_df = self.db.get_orbit_mass_profiles()
             orbit_mass_df.head(5).to_csv("analysis/plots/orbit_mass_profiles.csv", index=False)
 
             # 3. Success Rate by Year
-            year_df = self.query("""
-                SELECT
-                    strftime('%Y', date_utc) AS year,
-                    COUNT(*) AS launches,
-                    SUM(CASE WHEN success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(
-                        100.0 * SUM(CASE WHEN success THEN 1 ELSE 0 END) / COUNT(*),
-                        2
-                    ) AS success_rate
-                FROM launches
-                GROUP BY year
-                ORDER BY year ASC
-            """)
+            year_df = self.db.get_success_by_year()
 
             year_df["year"] = year_df["year"].astype(int)
             recent_years = year_df[year_df["year"] >= 2018]
@@ -392,23 +294,7 @@ class MissionAnalyzer:
         LOGGER.info("Analyzing configuration stability over time...")
 
         try:
-            dataframe = self.query("""
-                SELECT
-                    r.name AS rocket,
-                    lp.name AS launchpad,
-                    strftime('%Y', l.date_utc) AS year,
-                    COUNT(*) AS launches,
-                    SUM(CASE WHEN l.success THEN 1 ELSE 0 END) AS successful,
-                    ROUND(
-                        100.0 * SUM(CASE WHEN l.success THEN 1 ELSE 0 END) / COUNT(*),
-                        2
-                    ) AS success_rate
-                FROM launches l
-                JOIN rockets r ON l.rocket_id = r.id
-                JOIN launchpads lp ON l.launchpad_id = lp.id
-                GROUP BY r.name, lp.name, year
-                HAVING launches >= 2
-            """)
+            dataframe = self.db.get_config_stability_by_year()
 
             grouped = dataframe.groupby(["rocket", "launchpad"])
             stats = grouped["success_rate"].agg(["mean", "std"])
@@ -434,16 +320,7 @@ class MissionAnalyzer:
         LOGGER.info("Detecting rocket fatigue and sequential performance trends...")
 
         try:
-            dataframe = self.query("""
-                SELECT
-                    r.name AS rocket,
-                    l.date_utc,
-                    l.success
-                FROM launches l
-                JOIN rockets r ON l.rocket_id = r.id
-                WHERE l.success IS NOT NULL
-                ORDER BY r.name, l.date_utc
-            """)
+            dataframe = self.db.get_rocket_sequential_launches()
 
             dataframe["launch_number"] = (
                 dataframe.groupby("rocket")["date_utc"]
