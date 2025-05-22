@@ -57,7 +57,7 @@ This project builds a complete data flow from raw SpaceX API ingestion to visual
 ### 1. Clone and install
 
     git clone https://github.com/cosmocoder1/LaunchLens.git
-    cd spacex-data-pipeline
+    cd LaunchLens
     pipenv install
 
 ### 2. Run the full data pipeline
