@@ -69,7 +69,10 @@ This will:
 - Recreate the SQLite database  
 - Fetch fresh SpaceX data from the public API  
 - Load and normalize data into structured tables  
-- Generate visual plots and CSV summaries in `analysis/plots/`
+- Train a machine learning model to predict launch success  
+- Embed analytical outputs into a local Chroma vector store for RAG querying  
+- Generate visual plots, CSV summaries, and strategic markdown insights in `analysis/plots/`
+
 
 ### 3. Launch the interactive dashboard
 
